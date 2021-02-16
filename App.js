@@ -1,96 +1,79 @@
-import React, { Component } from 'react';
-import { View, Text, ToastAndroid, FlatList } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-gesture-handler';
 
-//home screen displaying all the coffee location names in the database
-class HomeScreen extends Component {
-  constructor(props){
-    super(props);
+import React, {Component} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-    this.state = {
-      isLoading: true,
-      listData: []
-    }
-  }
 
-  componentDidMount() {
-    this.unsubscribe = this.props.navigation.addListener('focus', () => {
-      this.checkLoggedIn();
-    });
+//user adds login credentials given from signing up to use mobile app
+import Login from './components/login';
+//user needs login credentials to use mobile app by signing up to app
+import Signup from './components/signup';
 
-    this.getData();
-  }
+//direct user to a list of possible coffee venues to review
+import Home from './components/home';
+//information about specific location
+import LocationInfo from './components/locationinfo';
 
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
+//search locations
+import SearchLocations from './components/searchlocations';
 
-  getData = async () => {
-    const value = await AsyncStorage.getItem('@session_token'); //REPETITION!!!!
-    return fetch("http://10.0.2.2:3333/api/1.0.0/find", {
-      'headers': {
-        'X-Authorization': value
-      }
-    })
-    .then((response) => {
-      if(response.status === 200){
-        return response.json()
-      }else if (response.status === 401){
-        ToastAndroid.show("You're not logged in", ToastAndroid.SHORT)
-        this.props.navigation.navigate("Login");
-      }else{
-        throw 'Something went wrong';
-      }
-    })
-    .then((responseJson) => {
-      this.setState({
-        isLoading: false,
-        listData: responseJson
-      })
-    })
-    .catch((error) => {
-      console.log(error);
-      ToastAndroid.show(error, ToastAndroid.SHORT);
-    })
-  }
+//user information 
+import Profile from './components/profile';
+//information about specific review
+import ReviewInfo from './components/reviewinfo';
+import EditProfile from './components/editprofile';
 
-  checkLoggedIn = async () => {
-    const value = await AsyncStorage.getItem('@session_token'); //REPETITION!!!!
-    if (value == null) {
-      this.props.navigation.navigate('Login');
-    }
-  };
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+const HomeStack = createStackNavigator();
+const ProfileStack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
-  render() {
+const HomeStackScreen = () => (
+  <HomeStack.Navigator>
+    <HomeStack.Screen name="Home" component={Home}/>
+    <HomeStack.Screen name="LocationInfo" component={LocationInfo}/>
+  </HomeStack.Navigator>
+); 
 
-    if (this.state.isLoading){
-      return (
-        <View
-          style = {{
-            flex: 1, 
-            flexDirection: 'column', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-          }}>
-          <Text>Loading...</Text>
-        </View>
-      );
-    }else{
-      return (
-        <View>
-          <FlatList
-            data = {this.state.listData}
-            renderItem = {({item}) => (
-              <View>
-                <Text>{item.location_name}</Text>
-              </View>
-            )}
-            keyExtractor = {(item, index) => item.location_id.toString()}
-          />
-        </View>
-      );
-    }
+const ProfileStackScreen = () => (
+  <ProfileStack.Navigator>
+    <ProfileStack.Screen name="Profile" component={Profile}/>
+    <ProfileStack.Screen name="EditProfile" component={EditProfile}/>
+  </ProfileStack.Navigator>
+); 
+
+const Tabs = () => (
+  <Tab.Navigator>
+    <Tab.Screen name="Home" component={HomeStackScreen}/>
+    <Tab.Screen name="SearchLocations" component={SearchLocations} options={{title: "Search"}}/>
+    <Tab.Screen name="Profile" component={ProfileStackScreen}/>
+  </Tab.Navigator>
+);
+
+
+
+class Entry extends Component{
+  render(){
+    return(
+      <NavigationContainer>
+        <Drawer.Navigator>
+          <Drawer.Screen name="Home" component={Tabs}/>
+          <Drawer.Screen name="Profile" component={ProfileStackScreen}/>
+        </Drawer.Navigator>
+        
+        
+        {/* <Stack.Navigator>
+          <Stack.Screen name="Login" component={Login} options={{title:"Sign In"}}/>
+          <Stack.Screen name="Signup" component={Signup} options={{title:"Register"}} />
+        </Stack.Navigator> */}
+      </NavigationContainer>
+    );
   }
 }
 
-export default HomeScreen;
+
+export default Entry;
