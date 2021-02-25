@@ -1,48 +1,113 @@
 import React, {Component} from 'react';
-import {View, StyleSheet, TouchableOpacity, Button} from 'react-native';
+import {ActivityIndicator, View, StyleSheet, TouchableOpacity, Button, ToastAndroid, FlatList, Alert} from 'react-native';
 import {Container, Header, Body, Title, Card, CardItem, Left, Right, Icon, Content, Text} from 'native-base';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Location from './location';
 
 class Home extends Component{
+    constructor(props){
+        super(props);
+
+        this.state = {
+            isLoading: true,
+            locationsData: null
+        }
+    }
+
+    componentDidMount(){
+        this.unsubscribe = this.props.navigation.addListener('focus', async () => {
+            //this.checkLoggedIn();
+            //Alert.alert(this.getToken().toString());
+            this.getData();
+        });
+        //this.checkLoggedIn();
+        this.getData();
+        //Alert.alert(this.getToken().toString());
+    }
+
+    getToken = async () => {
+        const token = await AsyncStorage.getItem('@session_token');
+        return token;
+      }
+
+    checkLoggedIn = async () => {
+        const value = await AsyncStorage.getItem('@session_token');
+        if (value == null) {
+            this.props.navigation.navigate("Login");
+        }
+    };
+
+    getData = async () => {
+        return fetch("http://10.0.2.2:3333/api/1.0.0/find", {
+            headers: {
+                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+            }
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json();
+            }else if (response.status === 400){
+                ToastAndroid.show("Bad Request", ToastAndroid.SHORT)
+            }else if (response.status === 401){
+                ToastAndroid.show("Unauthorised G", ToastAndroid.SHORT)
+                this.props.navigation.navigate("Login");
+            }else{
+                throw 'Something is wrong with the server!';
+            }
+        })
+        .then((responseJson) => {
+            this.setState({
+                isLoading: false,
+                locationsData: responseJson
+            });
+        })
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+
     render(){
         const navigation = this.props.navigation;
+        if(this.state.isLoading){
+            return (
+                <View style={styles.container}>
+                    <ActivityIndicator style={styles.loading}/>
+                </View>
+            )
+        }else{
+            return(
+                <Container style={styles.container}>
+                    <Content>
+                        <Card>
+                            <CardItem>
+                                <Icon name="location"/>
+                                <Title style={styles.text}>Locations</Title>
+                            </CardItem>
+                        </Card>
+                        
+                        <FlatList
+                            data={this.state.locationsData}
+                            renderItem={({item}) => (
+                                <Location
+                                    onPress={() => navigation.navigate("LocationInfo", {
+                                        "Key": item.location_id.toString()
+                                    })}
+                                    location_name = {item.location_name}
+                                    location_town =  {item.location_town}
+                                    avg_overall_rating = {item.avg_overall_rating}
+                                    //photo_path={{uri:"http://cdn.coffida.com/images/78346822.jpg"}}
+                                    //photo_path={{uri:item.photo_path}}
+                                    photo_path={{uri:"https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG"}}
+                                /> 
+                            )}
+                            keyExtractor={(item) => item.location_id.toString()}
+                        />
 
-        return(
-            <Container style={styles.container}>
-                <Content>
-                    <Card>
-                        <CardItem>
-                            <Icon name="map"/>
-                            <Title style={styles.text}>List of Locations:</Title>
-                        </CardItem>
-                    </Card>
-
-                    <Location
-                        onPress={() => navigation.navigate('LocationInfo')}
-                        location_name="Aunt Mary's Great Coffee Shop"
-                        location_town="London"
-                        avg_overall_rating="4.5"
-                        //photo_path="http://cdn.coffida.com/images/78346822.jpg"
-                        photo_path={{uri:"https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG"}}
-                    />
-                    
-                    <Location
-                    //TEMP VARIABLE
-                        onPress={() => navigation.navigate('LocationInfo')}
-                        location_name="Larry's Coffee Shop"
-                        location_town="Glasgow"
-                        avg_overall_rating="4.2"
-                        photo_path={{uri:"https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG"}}
-                    />
-
-                    <Button
-                        title="Info about Location"
-                        onPress={() => navigation.navigate('LocationInfo')}
-                    />
-                </Content>
-            </Container>
-        );
+                    </Content>
+                </Container>
+            );
+        }
     }
 }
 

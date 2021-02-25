@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, Button, Image, TouchableOpacity} from 'react-native';
 import {Container, Header, Body, Title, Card, CardItem, Left, Right, Icon, Content, Thumbnail, Subtitle} from 'native-base';
 
 class Location extends Component{
@@ -9,11 +9,11 @@ class Location extends Component{
         return(
             <TouchableOpacity key={this.props.location_name} onPress={this.props.onPress}>    
             <Card pointerEvents="none">
-                <CardItem>
+                <CardItem>  
                     {/* button onPress={() => alert('Button Clicked!')} 
                 button onPress={() => navigation.navigate('Reviewinfo')}*/}
                     <Left>
-                        <Thumbnail
+                        <Image
                             //source={require('./photos/coffee.jpg')}
                             style = {styles.image}
                             source = {this.props.photo_path}

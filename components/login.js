@@ -1,58 +1,102 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Button} from 'react-native';
-import {TextInput} from 'react-native-gesture-handler';
+import {View, Text, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
+import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {Container} from 'native-base';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 class Login extends Component{
+    constructor(props){
+        super(props);
+
+        this.state = {
+            email: "",
+            password: ""
+        }
+    }
+
+    login = async () => {
+        //VALIDATION HERE
+        return fetch("http://10.0.2.2:3333/api/1.0.0/user/login", {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.state)
+        })
+        .then((response) => {
+            if (response.status === 200){
+                return response.json()
+            }else if (response.status === 400){
+                ToastAndroid.show("Invalid email password", ToastAndroid.SHORT);
+            }else{
+                throw 'Something is wrong with the server';
+            }
+        })
+        .then(async (responseJson) => {
+            //console.log(responseJson);
+            await AsyncStorage.setItem('@session_token', JSON.stringify(responseJson.token));
+            await AsyncStorage.setItem('@user_id', JSON.stringify(responseJson.id));
+            this.props.navigation.navigate("Home");
+        })
+        .catch((error) =>  {
+            //console.log(error);
+            //ToastAndroid.show(error, ToastAndroid.SHORT);
+        }) 
+    }
+
     render(){
         const navigation = this.props.navigation;
-
         return(
-            <Container style={styles.container}>
-                <View style={styles.headerContainer}>
-                    <Text style={styles.headerText}>Welcome!</Text>
-                </View>
-                <View style={styles.loginContainer}>
-                    <Text style={styles.bodyText}>Email</Text>
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            placeholder="Your Email"
-                            style={styles.textInput}
-                            autoCaptialize="none"
-                        />
+            <ScrollView>
+                <Container style={styles.container}>
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.headerText}>Welcome!</Text>
+                    </View>
+                    <View style={styles.loginContainer}>
+                        <Text style={styles.bodyText}>Email</Text>
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                placeholder="Your Email"
+                                onChangeText = {(email) => this.setState({email})}
+                                value = {this.state.email}
+                                style={styles.textInput}
+                                //autoCaptialize="none"
+                            />
+                        </View>
+
+                        <Text style={[styles.bodyText, {marginTop: 30}]}>Password</Text>
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                placeholder="Your Password"
+                                onChangeText = {(password) => this.setState({password})}
+                                value = {this.state.password}
+                                style={styles.textInput}
+                                secureTextEntry={true}
+                                //autoCaptialize="none"
+                            />
+                        </View>
                     </View>
 
-                    <Text style={[styles.bodyText, {marginTop: 30}]}>Password</Text>
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            placeholder="Your Password"
-                            style={styles.textInput}
-                            secureTextEntry={true}
-                            autoCaptialize="none"
-                        />
+
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            onPress = {() => this.login()}
+                            style={styles.button}
+                        >
+                        <Text style={styles.buttonText}>Sign In</Text> 
+                        </TouchableOpacity>
+
+                        <Text style={[styles.bodyText, {paddingTop: 40}]}>Not Signed In?</Text>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Signup")}
+                            style={[styles.button, {marginTop: 5}]}
+                        >
+                        <Text style={styles.buttonText}>Register</Text> 
+                        </TouchableOpacity>
                     </View>
-                </View>
-
-
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Locations')}
-                        style={styles.button}
-                    >
-                    <Text style={styles.buttonText}>Sign In</Text> 
-                    </TouchableOpacity>
-
-
-                    <Text style={[styles.bodyText, {paddingTop: 40}]}>Not Signed In?</Text>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Signup')}
-                        style={[styles.button, {marginTop: 5}]}
-                    >
-                    <Text style={styles.buttonText}>Register</Text> 
-                    </TouchableOpacity>
-                </View>
-
-            </Container>
+                </Container>
+            </ScrollView>
         );
     }
 }
@@ -69,7 +113,7 @@ const styles = StyleSheet.create({
     headerContainer:{
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: '#66462f'
+        backgroundColor: '#2e1503'
     },
     loginContainer:{
         flex: 1,
@@ -106,7 +150,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         borderRadius: 10,
         padding: 10,
-        backgroundColor: '#66462f',
+        backgroundColor: '#2e1503',
         textAlign: 'center'
     },
     buttonText: {
