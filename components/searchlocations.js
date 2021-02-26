@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 import {ActivityIndicator, View, Text, StyleSheet, Button, ToastAndroid, FlatList, TouchableOpacity} from 'react-native';
 import {Container, Header, Input, Card, CardItem, Left, Right} from 'native-base';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {Rating, AirbnbRating} from 'react-native-elements';
+import {AirbnbRating} from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Location from './location';
 
 class Search extends Component{
     constructor(props){
@@ -29,6 +29,7 @@ class Search extends Component{
         this.unsubscribe = this.props.navigation.addListener('focus', async () => { 
             this.checkLoggedIn();
             this.getData("http://10.0.2.2:3333/api/1.0.0/find");
+            
         })
         this.checkLoggedIn();
         this.getData("http://10.0.2.2:3333/api/1.0.0/find");
@@ -170,6 +171,11 @@ class Search extends Component{
                         />
 
                     </View>
+
+                    <Button
+                        title="pagination"
+                        onPress={() => navigation.navigate("SearchResults")}
+                    />
 
                     <Card>
                         <CardItem>

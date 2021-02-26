@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ActivityIndicator, View, Text, StyleSheet, ToastAndroid, FlatList, Image, Button, Alert, TouchableOpacity} from 'react-native';
-import {Container, Card} from 'native-base';
+import {Container, Card, Title} from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Review from './review';
@@ -17,7 +17,8 @@ class LocationInfo extends Component{
             image: null,
             displayImage: true,
             liked: false, 
-            favourited: false
+            favourited: false,
+            isUsers: false,
         } 
     }
 
@@ -274,10 +275,8 @@ class LocationInfo extends Component{
                     <Card style={styles.card}>
                         <Text>Location Name: {this.state.locationData.location_name}</Text>
                         <Text>Location Town: {this.state.locationData.location_town}</Text>
+ 
 
-                        <Text>user first name: {this.state.userData.first_name}</Text>
-                    
-                        
                         <Text></Text>
                         <Text>Average Overall Rating: {this.state.locationData.avg_overall_rating}</Text>
                         <Text>Average Price Rating: {this.state.locationData.avg_price_rating}</Text>
@@ -306,16 +305,16 @@ class LocationInfo extends Component{
                             name = {'star'}
                             size = {20}
                         />
-                        <Text> unfavourite Location</Text>
+                        <Text> Unfavourite Location</Text>
                     </TouchableOpacity>
 
-                    {/* {this.checkFaved() ? (
+                    {/* {this.state.userData.favourite_locations.includes(this.state.locationData) ? (
                         <TouchableOpacity style={styles.button} onPress={() => this.unfavouriteLocation(this.state.locationKey)}>
                             <Icon
                                 name = {'star'}
                                 size = {20}
                             />
-                            <Text> unfavourite Location</Text>
+                            <Text> Unfavourite Location</Text>
                         </TouchableOpacity>
                     )
                     : (
@@ -327,7 +326,7 @@ class LocationInfo extends Component{
                             <Text> Favourite Location</Text>
                         </TouchableOpacity>
                     )
-                    }  */}
+                    } */}
 
                     
                     <Text>Fav locations:</Text>
@@ -367,15 +366,17 @@ class LocationInfo extends Component{
                     <FlatList
                         data={this.state.locationData.location_reviews}
                         renderItem={({item}) => (
-                            <Review
-                                liked = {this.state.liked}
-                                onPress={() => this.likeReview(item.review_id)}
+                            <Review 
+                                //liked = {this.state.liked}
+                                isUsers={this.state.isUsers} 
+                                onPressLike={() => this.likeReview(item.review_id)}
+                                onPressUnlike={() => this.unlikeReview(item.review_id)}
                                 review_id = {item.review_id}
-                                overall_rating = {item.overall_rating}
+                                overall_rating = {item.overall_rating} 
                                 price_rating = {item.price_rating}
                                 quality_rating = {item.quality_rating}
                                 clenliness_rating = {item.clenliness_rating} 
-                                review_body = {item.review_body}
+                                review_body = {item.review_body} 
                                 likes = {item.likes}
                                 photo_path = {{uri:"https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG"}}
                             />
@@ -403,5 +404,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 5
+    },
+    title: {
+        fontSize: 15,
+        color: '#000',
+        fontWeight: 'bold'
     }
 });

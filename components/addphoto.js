@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import {ActivityIndicator, View, Text, ToastAndroid, Alert, StyleSheet, Button} from 'react-native';
+import {ActivityIndicator, View, Text, ToastAndroid, Alert, StyleSheet, TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/AntDesign';
 import {RNCamera} from 'react-native-camera';
 
 class AddPhoto extends Component{
@@ -8,7 +9,7 @@ class AddPhoto extends Component{
         super(props);
 
         this.state = {
-            isLoading: true,
+            isLoading: false,
             locationKey: '',
             reviewKey: ''
         }
@@ -35,6 +36,7 @@ class AddPhoto extends Component{
 
 
     addPhoto = async (picture) => {
+        console.log(picture.uri)
         return fetch("http://10.0.2.2:3333/api/1.0.0/location/" + this.state.locationKey + "/review/" + this.state.reviewKey + "/photo", {
             method: 'post',
             headers: {
@@ -63,6 +65,7 @@ class AddPhoto extends Component{
         .catch((error) =>  {
             console.log(error);
             ToastAndroid.show(error, ToastAndroid.SHORT);
+            throw error;
         }) 
     }
 
@@ -81,8 +84,8 @@ class AddPhoto extends Component{
                 '',
                 'Add this photo to review?',  
                 [
-                {text: 'Cancel', onPress: () => this.takePicture()},
-                {text: 'OK', onPress: () => this.addPhoto(picture)},
+                    {text: 'Cancel', onPress: () => this.takePicture()},
+                    {text: 'OK', onPress: () => this.addPhoto(picture)},
                 ],
                 { cancelable: false }
             )
@@ -106,10 +109,14 @@ class AddPhoto extends Component{
                             this.camera = ref;
                         }}
                     />
-                    <Button
-                        title="Take Photo" 
-                        onPress={() => this.takePicture()} 
-                    />
+                    
+                    <TouchableOpacity style={styles.button} onPress={() => this.takePicture()}>
+                        <Icon
+                            name = {'camera'}
+                            size = {20}
+                        />
+                        <Text> Take Photo</Text>
+                    </TouchableOpacity>
                 </View>
             );
         }
@@ -122,5 +129,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5edda'
-    }
+    },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        padding: 5
+    }  
 });

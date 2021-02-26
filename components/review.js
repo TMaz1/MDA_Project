@@ -1,9 +1,21 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, TouchableOpacity, Image} from 'react-native';
-import {Container, Header, Body, Title, Card, CardItem, Left, Right, Content, Subtitle} from 'native-base';
+import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {Title, Card, CardItem, Left, Right, Subtitle} from 'native-base';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 class Review extends Component{
+    constructor(props){
+        super(props);
+
+        this.state = {
+            displayImage: true
+        }
+    }
+
+    onErrorLoadingImage = () => {
+        this.setState({displayImage: false})
+    }
+
     render(){
         const navigation = this.props.navigation;
 
@@ -17,11 +29,15 @@ class Review extends Component{
                             <Title style={[styles.reviewText, {fontWeight: 'bold'}]}> Overall Rating: {this.props.overall_rating}</Title>
                             <Text style={[styles.reviewText, {fontStyle: 'italic', paddingBottom: 15}]}>"{this.props.review_body}"</Text>
                             
-
-                            <Image
-                                style = {styles.image}
-                                source = {this.props.photo_path}
-                            />
+                            {this.state.displayImage ? (
+                                <Image
+                                    style = {styles.image}
+                                    source = {this.props.photo_path}
+                                    onError={this.onErrorLoadingImage}
+                                />
+                            ) : (
+                                <View></View>
+                            )}
 
                             <Subtitle style={[styles.text, {paddingTop: 15}]}>Price Rating: {this.props.price_rating}</Subtitle>
                             <Subtitle style={styles.text}>Quality Rating: {this.props.quality_rating}</Subtitle>
@@ -31,19 +47,37 @@ class Review extends Component{
 
                     <Right>
                         {this.props.isUsers ? (
-                            <TouchableOpacity style={[styles.button, {justifyContent: 'flex-start'}]} key={this.props.review_id} onPress={this.props.onPress}>
-                            <Icon
-                                name = {'edit'}
-                                size = {20}
-                            />
-                            <Text> Edit</Text>
-                            </TouchableOpacity>
+                            <View>
+                                <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPress}>
+                                <Icon
+                                    name = {'edit'}
+                                    size = {20}
+                                />
+                                <Text> Edit</Text>
+                                </TouchableOpacity>
+                            </View>
                         ) : (
-                            <Text></Text>
+                            <View>
+                                <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPressUnlike}>
+                                    <Icon
+                                        name = {'like1'}
+                                        size = {20}
+                                    />
+                                    <Text> Unlike</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPressLike}>
+                                <Icon
+                                    name = {'like2'}
+                                    size = {20} 
+                                />
+                                <Text> Like</Text>
+                                </TouchableOpacity>
+                                <Subtitle style={styles.text}>Likes ({this.props.likes})</Subtitle>
+                            </View>
                         )
                         }
 
-                        {this.props.liked ? (
+                        {/* {this.props.liked ? (
                             <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPress}>
                                 <Icon
                                     name = {'like1'}
@@ -59,8 +93,8 @@ class Review extends Component{
                                 />
                                 <Text> Like</Text>
                             </TouchableOpacity>
-                        )}
-                        <Subtitle style={styles.text}>Likes ({this.props.likes})</Subtitle>
+                        )} */}
+   
                     </Right>
                 </CardItem>
             </Card>
@@ -92,17 +126,22 @@ const styles = StyleSheet.create({
     },
     text: {
         color: 'black',
-        paddingBottom: 3
+        paddingLeft: 10,
     },
     reviewText: {
         color: 'black',
         paddingBottom: 3,
         fontSize: 16,
-        width: 340
+        width: 220
     },
     button: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         padding: 5
-    }
+    },
+    reviewImage: {
+        borderRadius: 8,
+        maxWidth: 100,
+        height: 'auto'
+    },
 });

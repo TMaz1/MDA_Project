@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ActivityIndicator, ToastAndroid, FlatList, View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
+import {ActivityIndicator, ToastAndroid, FlatList, View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,10 +13,6 @@ class Profile extends Component{
         this.state = {
             isLoading: true,
             userData: [],
-            isUsers: true,
-
-            image: null,
-            displayImage: true,
 
             displayFavs: false,
             displayReviews: false,
@@ -70,6 +66,67 @@ class Profile extends Component{
             console.log(error)
         });
     }
+
+    unlikeReview = async (reviewID, locationID) => {
+        return fetch("http://10.0.2.2:3333/api/1.0.0/location/" + locationID + "/review/" + reviewID + "/like", {
+            method: 'delete',
+            headers: {
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
+            },
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.text();
+            }else if (response.status === 401){
+                ToastAndroid.show("Unauthorised", ToastAndroid.SHORT)
+                this.props.navigation.navigate("Login");
+            }else if (response.status === 403){
+                ToastAndroid.show("Updating Information That Is Not Yours...", ToastAndroid.SHORT)
+                this.props.navigation.navigate("Login");
+            }else if (response.status === 404){
+                ToastAndroid.show("Not Found", ToastAndroid.SHORT)
+            }else{
+                throw 'Something is wrong with the server!';
+            }
+        })
+        .then((responseJson) => {
+            console.log(responseJson);
+            ToastAndroid.show("Review Unliked", ToastAndroid.SHORT);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+    }
+
+    getPhoto = async (locationID, reviewID) => {
+        console.log(locationID)
+        console.log(reviewID)
+        return fetch("http://10.0.2.2:3333/api/1.0.0/location/" + locationID + "/review/" + reviewID + "/photo", {
+            headers: {
+                'Content-Type': 'image/jpeg',
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
+            }
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json();
+            }else if (response.status === 404){
+                throw '404 - image does not exist'
+            }else{
+                throw 'No Image';
+            }
+        })
+        .then((responseJson) => {
+            console.log("image recieved")
+            this.setState({
+                image: responseJson
+            });
+        })
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+    
 
     render(){
         const navigation = this.props.navigation;
@@ -182,12 +239,14 @@ class Profile extends Component{
                             <FlatList
                                 data={this.state.userData.reviews}
                                 renderItem={({item}) => (
+                                    <View>
                                     <Review
-                                        isUsers = {this.state.isUsers}
+                                        isUsers = {this.state.displayReviews}
                                         onPress={() => navigation.navigate("EditReview", {
                                             "reviewKey": item.review.review_id,
                                             "locationKey": item.location.location_id
                                         })}
+                                        //photo_path = {() => this.getPhoto(item.review.review_id, item.location.location_id)}
                                         review_id = {item.review.review_id}
                                         overall_rating = {item.review.overall_rating}
                                         price_rating = {item.review.price_rating}
@@ -197,6 +256,7 @@ class Profile extends Component{
                                         likes = {item.review.likes}
                                         photo_path = {{uri:"https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG"}}
                                     />
+                                    </View>
                                 )}
                                 keyExtractor={(item) => item.review.review_id.toString()}
                             />
@@ -209,6 +269,9 @@ class Profile extends Component{
                                 data={this.state.userData.liked_reviews}
                                 renderItem={({item}) => (
                                     <Review
+                                        isUsers = {this.state.displayReviews}
+                                        onPressLiked={() => ToastAndroid.show("Already Liked!", ToastAndroid.SHORT)}
+                                        onPressUnliked={() => this.unlikeReview(item.review_id, item.location.location_id)}
                                         review_id = {item.review.review_id}
                                         overall_rating = {item.review.overall_rating}
                                         price_rating = {item.review.price_rating}
@@ -240,13 +303,13 @@ export default Profile;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#009387'
+        backgroundColor: '#2e1503'
     },
     header: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
+    }, 
     headerText: {
         color: 'white',
         fontWeight: 'bold',
@@ -255,7 +318,8 @@ const styles = StyleSheet.create({
     emailText: {
         color: 'white',
         fontSize: 14,
-        paddingBottom: 14
+        paddingBottom: 10,
+        paddingRight: 5
     },
     profileContainer: {
         flexDirection: 'row',

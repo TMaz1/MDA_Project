@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ActivityIndicator , View, Text, Button, Alert, TextInput, StyleSheet} from 'react-native';
+import {ActivityIndicator , View, Text, Button, Alert, TextInput, StyleSheet, ToastAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class EditProfile extends Component{
@@ -8,7 +8,7 @@ class EditProfile extends Component{
 
         this.state = {
             isLoading: true,
-            userData: null,
+            userData: [],
 
             updated_first_name: '',
             updated_last_name: '',
@@ -55,7 +55,11 @@ class EditProfile extends Component{
         .then((responseJson) => {
             this.setState({
                 isLoading: false,
-                userData: responseJson
+                userData: responseJson,
+                updated_first_name: responseJson.first_name,
+                updated_last_name: responseJson.last_name,
+                updated_email: responseJson.email,
+                updated_password: responseJson.password
             });
         })
         .catch((error) => {
@@ -65,6 +69,10 @@ class EditProfile extends Component{
 
     updateUserInfo = async () => {
         let to_send = {};
+        console.log(this.state.updated_first_name);
+        console.log(this.state.userData.first_name);
+        console.log(this.state.updated_last_name);
+        console.log(this.state.userData.last_name);
     
         if (this.state.updated_first_name != this.state.userData.first_name){
           to_send['first_name'] = this.state.updated_first_name;
@@ -95,7 +103,7 @@ class EditProfile extends Component{
         })
         .then((response) => {
             if(response.status === 200){
-                return response.json();
+                return response.text();
             }else if (response.status === 400){
                 ToastAndroid.show("Bad Request", ToastAndroid.SHORT)
             }else if (response.status === 401){
@@ -114,7 +122,7 @@ class EditProfile extends Component{
             //idk if this is the right move
             console.log(responseJson);
             ToastAndroid.show("Account Information Updated", ToastAndroid.SHORT);
-            this.props.navigation.navigate("DisplayProfile");
+            this.props.navigation.navigate("Profile");
         })
         .catch((error) => {
             console.log(error);
@@ -126,7 +134,7 @@ class EditProfile extends Component{
             '',
             'Are you sure you want to make these changes?',  
             [
-               {text: 'Cancel', onPress: () => this.props.navigation.navigate("displayProfile")},
+               {text: 'Cancel', onPress: () => this.props.navigation.navigate("Profile")},
                {text: 'OK', onPress: () => this.updateUserInfo()},
             ],
             { cancelable: false }

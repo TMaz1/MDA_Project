@@ -124,8 +124,28 @@ class AddReview extends Component{
         }
     }
 
+    profanityFilter = (text) => {
+        if (text !== 0) {
+            if (text.includes('tea') || text.includes('cakes') || text.includes('pastries')){
+                ToastAndroid.show("Do not mention teas, cakes or pastries in review", ToastAndroid.SHORT);
+            }
+            else {
+                this.setState({review_body: text})
+            }
+        }
+        else {
+            ToastAndroid.show("Please write something for the review", ToastAndroid.SHORT);
+        }
+    }
+
+    getListOfIDs = (list) => {
+        let array = list.map((obj) => obj.review.review_id);
+        return(array);
+    }
+
     render(){
         const navigation = this.props.navigation;
+        
         if(this.state.isLoading){
             return (
               <View style={styles.container}>
@@ -208,16 +228,16 @@ class AddReview extends Component{
                         <Card>
                             <CardItem>
                                 <Left>
-                                <Text>Enter Review:</Text>
+                                    <Text>Enter Review:</Text>
                                 </Left>
                                 <Right>
-                                <TextInput style={styles.bodyInput}
-                                    placeholder="Type Here..."
-                                    multiline={true}
-                                    maxLength={200}
-                                    onChangeText = {(review_body) => this.setState({review_body})}
-                                    value = {this.state.review_body}
-                                />
+                                    <TextInput style={styles.bodyInput}
+                                        placeholder="Type Here..."
+                                        multiline={true}
+                                        maxLength={200}
+                                        onChangeText = {(review_body) => this.profanityFilter(review_body)}
+                                        value = {this.state.review_body}
+                                    />
                                 </Right>
                             </CardItem>
                         </Card>
@@ -226,10 +246,17 @@ class AddReview extends Component{
                             title="Save"
                             onPress = {() => this.addReview()}
                         />
+
+                        <Text>list of review ids: </Text>
+                        <Button
+                            title="get list of ids"
+                            onPress = {() => this.getListOfIDs(this.state.userData.reviews)}
+                        />
+                        
                         <Button
                             title="Add a Photo"
                             onPress = {() => this.props.navigation.navigate("AddPhoto", {
-                                "reviewKey": Math.max(...this.state.userData.reviews),
+                                "reviewKey": Math.max(...this.getListOfIDs(this.state.userData.reviews)),
                                 "locationKey": this.state.locationKey,
                             })}
                         />
@@ -239,7 +266,6 @@ class AddReview extends Component{
         }
     }
 }
-
 export default AddReview;
 
 const styles = StyleSheet.create({

@@ -61,7 +61,7 @@ class Login extends Component{
                                 onChangeText = {(email) => this.setState({email})}
                                 value = {this.state.email}
                                 style={styles.textInput}
-                                //autoCaptialize="none"
+                                autoCaptialize="none"
                             />
                         </View>
 
@@ -73,7 +73,7 @@ class Login extends Component{
                                 value = {this.state.password}
                                 style={styles.textInput}
                                 secureTextEntry={true}
-                                //autoCaptialize="none"
+                                autoCaptialize="none"
                             />
                         </View>
                     </View>
