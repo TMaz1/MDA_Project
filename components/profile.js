@@ -4,6 +4,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Location from './location';
+import Review from './review';
 
 class Profile extends Component{
     constructor(props){
@@ -12,6 +13,7 @@ class Profile extends Component{
         this.state = {
             isLoading: true,
             userData: [],
+            isUsers: true,
 
             image: null,
             displayImage: true,
@@ -24,11 +26,10 @@ class Profile extends Component{
 
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-            //this.checkLoggedIn();
+            this.checkLoggedIn();
             this.getUserData();
-            this.setState({displayReviews: true});
         })
-        //this.checkLoggedIn();
+        this.checkLoggedIn();
         this.getUserData();
         this.setState({displayReviews: true});
     }
@@ -41,11 +42,10 @@ class Profile extends Component{
     };
 
     getUserData = async () => {
-        //const userID = await AsyncStorage.getItem('@user_id');
-        const userID = 14;
+        const userID = await AsyncStorage.getItem('@user_id');
         return fetch("http://10.0.2.2:3333/api/1.0.0/user/" + userID, {
             headers: {
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             }
         })
         .then((response) => {
@@ -104,7 +104,7 @@ class Profile extends Component{
                         <View style={styles.backgroundIcon}>
                             <FontAwesome5
                                 name = {'coffee'}
-                                size = {70}
+                                size = {55}
                                 //color = '#65350f'
                             />
                         </View>
@@ -163,7 +163,7 @@ class Profile extends Component{
                                 data={this.state.userData.favourite_locations}
                                 renderItem={({item}) => (
                                     <Location
-                                        onPress={() => navigation.navigate("LocationInfo", {
+                                        onPress={() => navigation.navigate("Home", {screen: "LocationInfo"}, {
                                             "Key": item.location_id.toString()
                                         })}
                                         location_name = {item.location_name}
@@ -175,7 +175,7 @@ class Profile extends Component{
                                 keyExtractor={(item) => item.location_id.toString()} //is this a suitable keyextractor?
                             />
                         ) : (
-                            <Text>not favs</Text>
+                            <Text></Text>
                         )}
 
                         {this.state.displayReviews ? (
@@ -183,6 +183,11 @@ class Profile extends Component{
                                 data={this.state.userData.reviews}
                                 renderItem={({item}) => (
                                     <Review
+                                        isUsers = {this.state.isUsers}
+                                        onPress={() => navigation.navigate("EditReview", {
+                                            "reviewKey": item.review.review_id,
+                                            "locationKey": item.location.location_id
+                                        })}
                                         review_id = {item.review.review_id}
                                         overall_rating = {item.review.overall_rating}
                                         price_rating = {item.review.price_rating}
@@ -196,7 +201,7 @@ class Profile extends Component{
                                 keyExtractor={(item) => item.review.review_id.toString()}
                             />
                         ) : (
-                            <Text>not reviews</Text>
+                            <Text></Text>
                         )}
 
                         {this.state.displayLiked ? (
@@ -217,7 +222,7 @@ class Profile extends Component{
                                 keyExtractor={(item) => item.review.review_id.toString()}
                             />
                         ) : (
-                            <Text>not liked</Text>
+                            <Text></Text>
                         )}
                     
 
@@ -262,12 +267,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 10,
-        width: 120,
-        height: 120,
-        borderRadius: 120/2
+        width: 100,
+        height: 100,
+        borderRadius: 100/2
     },
     footer: {
-        flex: 1,
+        flex: 2,
         justifyContent: 'center',
         backgroundColor: '#fff',
         borderTopLeftRadius: 30,

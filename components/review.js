@@ -30,13 +30,36 @@ class Review extends Component{
                     </Left>
 
                     <Right>
-                        <TouchableOpacity style={styles.button} onPress={() => alert('Liked Reviews Clicked!')}>
+                        {this.props.isUsers ? (
+                            <TouchableOpacity style={[styles.button, {justifyContent: 'flex-start'}]} key={this.props.review_id} onPress={this.props.onPress}>
                             <Icon
-                                name = {'like2'}
+                                name = {'edit'}
                                 size = {20}
                             />
-                            <Text> Like</Text>
-                        </TouchableOpacity>
+                            <Text> Edit</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <Text></Text>
+                        )
+                        }
+
+                        {this.props.liked ? (
+                            <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPress}>
+                                <Icon
+                                    name = {'like1'}
+                                    size = {20}
+                                />
+                                <Text> Unlike</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={styles.button} key={this.props.review_id} onPress={this.props.onPress}>
+                                <Icon
+                                    name = {'like2'}
+                                    size = {20}
+                                />
+                                <Text> Like</Text>
+                            </TouchableOpacity>
+                        )}
                         <Subtitle style={styles.text}>Likes ({this.props.likes})</Subtitle>
                     </Right>
                 </CardItem>

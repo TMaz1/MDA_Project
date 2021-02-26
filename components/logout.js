@@ -28,7 +28,7 @@ class Logout extends Component{
         return fetch("http://10.0.2.2:3333/api/1.0.0/user/logout", {
             method: 'post',
             headers: {
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': token
             } 
         })
         .then((response) => {

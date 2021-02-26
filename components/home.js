@@ -17,13 +17,10 @@ class Home extends Component{
 
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus', async () => {
-            //this.checkLoggedIn();
-            //Alert.alert(this.getToken().toString());
-            this.getData();
+            this.checkLoggedIn();
+            
         });
-        //this.checkLoggedIn();
         this.getData();
-        //Alert.alert(this.getToken().toString());
     }
 
     getToken = async () => {
@@ -41,7 +38,7 @@ class Home extends Component{
     getData = async () => {
         return fetch("http://10.0.2.2:3333/api/1.0.0/find", {
             headers: {
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             }
         })
         .then((response) => {

@@ -10,7 +10,7 @@ class AddReview extends Component{
         super(props);
         this.state = {
             isLoading: false,
-            userData: null,
+            userData: [],
 
             locationKey: '',
             locationNameKey: '',
@@ -34,10 +34,10 @@ class AddReview extends Component{
                     locationNameKey: this.props.route.params.locationNameKey
                 })
             }
-            //this.checkLoggedIn();
+            this.checkLoggedIn();
             this.getUserData();
         })
-        //this.checkLoggedIn();
+        this.checkLoggedIn();
         this.getUserData();
       }
     
@@ -49,13 +49,20 @@ class AddReview extends Component{
     };
 
     addReview = async () => {
+        let to_send = {};
+        to_send['overall_rating'] = parseInt(this.state.overall_rating);
+        to_send['price_rating'] = parseInt(this.state.price_rating);
+        to_send['quality_rating'] = parseInt(this.state.quality_rating);
+        to_send['clenliness_rating'] = parseInt(this.state.clenliness_rating);
+        to_send['review_body'] = this.state.review_body;
+
         return fetch("http://10.0.2.2:3333/api/1.0.0/location/" + this.state.locationKey + "/review", {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             },
-            body: JSON.stringify(this.state)
+            body: JSON.stringify(to_send)
         })
         .then((response) => {
             if (response.status === 201){
@@ -81,11 +88,10 @@ class AddReview extends Component{
     }
     
     getUserData = async () => {
-        //const userID = await AsyncStorage.getItem('@user_id');
-        const userID = 14;
+        const userID = await AsyncStorage.getItem('@user_id');
         return fetch("http://10.0.2.2:3333/api/1.0.0/user/" + userID, {
             headers: {
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             }
         })
         .then((response) => {
@@ -124,14 +130,14 @@ class AddReview extends Component{
             return (
               <View style={styles.container}>
                   <ActivityIndicator style={styles.loading}/>
-                  <Text>hello!</Text>
               </View>
             )
         }else{
             return(
                 <ScrollView>
                     <Container style={styles.container}>
-                        <Title style={styles.title}>{this.state.locationNameKey}</Title>
+                        <Title style={styles.title}>{this.state.locationKey}</Title>
+                        <Text>user first name: {this.state.userData.first_name}</Text>
                         
                         <Card>
                             <CardItem>
@@ -223,7 +229,7 @@ class AddReview extends Component{
                         <Button
                             title="Add a Photo"
                             onPress = {() => this.props.navigation.navigate("AddPhoto", {
-                                "reviewKey": Math.max(this.state.userData.reviews.review.review_id),
+                                "reviewKey": Math.max(...this.state.userData.reviews),
                                 "locationKey": this.state.locationKey,
                             })}
                         />

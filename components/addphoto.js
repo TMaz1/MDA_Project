@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ActivityIndicator, View, Text, ToastAndroid, Alert, StyleSheet} from 'react-native';
+import {ActivityIndicator, View, Text, ToastAndroid, Alert, StyleSheet, Button} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RNCamera} from 'react-native-camera';
 
@@ -22,7 +22,7 @@ class AddPhoto extends Component{
                     locationKey: this.props.route.params.locationKey
                 })
             }
-            //this.checkLoggedIn();
+            this.checkLoggedIn();
         })
     }
 
@@ -39,7 +39,7 @@ class AddPhoto extends Component{
             method: 'post',
             headers: {
                 'Content-Type': 'image/jpeg',
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             },
             body: picture
         })
@@ -70,8 +70,8 @@ class AddPhoto extends Component{
         if(this.camera){
             const options = {quality: 0.5, base64: true};
             const picture = await this.camera.takePictureAsync(options);
-            this.displayAlert(picture);
-            //this.addPhoto(picture); 
+            //this.displayAlert(picture);
+            this.addPhoto(picture); 
         }
     }
 
@@ -95,6 +95,7 @@ class AddPhoto extends Component{
             return (
                 <View style={styles.container}>
                     <ActivityIndicator style={styles.loading}/>
+                    <Text>{this.state.reviewKey}</Text>
                 </View>
             )
         }else{

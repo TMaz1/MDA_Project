@@ -129,7 +129,7 @@ class Entry extends Component{
     return(
       <NavigationContainer>
           <Drawer.Navigator>
-            {/* <Drawer.Screen name="Login" component={EnterStackScreen}/> */}
+            <Drawer.Screen name="Login" component={EnterStackScreen}/>
             <Drawer.Screen name="Home" component={Tabs}/>
             <Drawer.Screen name="Search" component={SearchStackScreen} />
             <Drawer.Screen name="Profile" component={ProfileStackScreen}/>

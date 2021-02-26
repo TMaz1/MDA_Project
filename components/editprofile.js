@@ -15,7 +15,7 @@ class EditProfile extends Component{
             updated_email: '',
             updated_password: ''
         };
-    }
+    }  
 
     componentDidMount(){
         this.unsubscribe = this.props.navigation.addListener('focus', async () => {
@@ -34,11 +34,10 @@ class EditProfile extends Component{
     };
 
     getUserData = async () => {
-        //const userID = await AsyncStorage.getItem('@user_id');
-        const userID = 14;
+        const userID = await AsyncStorage.getItem('@user_id');
         return fetch("http://10.0.2.2:3333/api/1.0.0/user/" + userID, {
             headers: {
-                'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+                'X-Authorization': await AsyncStorage.getItem('@session_token')
             }
         })
         .then((response) => {
@@ -85,13 +84,12 @@ class EditProfile extends Component{
     
         console.log(to_send);
     
-        //const userID = await AsyncStorage.getItem('@user_id');
-        const userID = 14;
+        const userID = await AsyncStorage.getItem('@user_id');
         return fetch("http://10.0.2.2:3333/api/1.0.0/user/" + userID, {
           method: 'patch',
           headers: {
             'Content-Type': 'application/json',
-            'X-Authorization': "5dc270748cdabc55eb642b9fb0189cb8"
+            'X-Authorization': await AsyncStorage.getItem('@session_token')
           },
           body: JSON.stringify(to_send)
         })
